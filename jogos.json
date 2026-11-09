@@ -1,13 +1,5 @@
 [
  {
-  "id": "a3",
-  "name": "Space Blob",
-  "url": "https://example.com/space-blob",
-  "desc": "Defenda a galáxia de gosmas invasoras.",
-  "theme": "espaco",
-  "emoji": "👾"
- },
- {
   "id": "a4",
   "name": "Corrida Maluca",
   "url": "https://example.com/corrida",
