@@ -1,0 +1,8 @@
+[
+ {"id":"a1","name":"Pixel Pulo","url":"https://example.com/pixel-pulo","desc":"Pule, desvie e chegue na bandeira!","theme":"aventura","emoji":"🐸","tag":"NOVO"},
+ {"id":"a2","name":"Cobrinha Neon","url":"https://example.com/cobrinha","desc":"A clássica, só que mais rápida.","theme":"cobra","emoji":"🐍","tag":"HOT"},
+ {"id":"a3","name":"Space Blob","url":"https://example.com/space-blob","desc":"Defenda a galáxia de gosmas invasoras.","theme":"espaco","emoji":"👾"},
+ {"id":"a4","name":"Corrida Maluca","url":"https://example.com/corrida","desc":"Derrube os rivais e cruze a linha.","theme":"corrida","emoji":"🏎️","tag":"HOT"},
+ {"id":"a5","name":"Caça-Fantasma","url":"https://example.com/fantasma","desc":"Ilumine, capture e fuja!","theme":"fantasma","emoji":"👻","tag":"NOVO"},
+ {"id":"a6","name":"Torre de Blocos","url":"https://example.com/torre","desc":"Empilhe sem deixar cair.","theme":"puzzle","emoji":"🧱"}
+]
