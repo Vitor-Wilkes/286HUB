@@ -19,7 +19,7 @@
 *{box-sizing:border-box}
 html,body{margin:0}
 body{font-family:"Press Start 2P",ui-monospace,Menlo,Consolas,monospace;color:var(--text);
-  background:linear-gradient(var(--sky1),var(--sky2));background-attachment:fixed;min-height:100vh;overflow-x:hidden}
+  background:linear-gradient(var(--sky1),var(--sky2));background-attachment:fixed;min-height:100vh;min-height:100dvh;overflow-x:hidden}
 button,input,select,textarea{font-family:inherit}
 button{cursor:pointer}
 .bg{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
@@ -27,7 +27,7 @@ button{cursor:pointer}
 .cloud{position:absolute;left:0;top:0;width:96px;height:32px;background:var(--cloud);box-shadow:32px -16px 0 var(--cloud),64px 0 0 var(--cloud),-16px 16px 0 var(--cloud);opacity:.9;will-change:transform}
 .star{position:absolute;width:8px;height:8px;background:var(--yellow);opacity:0;animation:tw 2.4s ease-in-out infinite}
 @keyframes tw{0%,100%{opacity:0}50%{opacity:var(--star)}}
-.wrap{position:relative;z-index:1;max-width:1560px;margin:0 auto;padding:24px 16px 60px}
+.wrap{position:relative;z-index:1;max-width:1560px;margin:0 auto;padding:calc(24px + env(safe-area-inset-top,0px)) 16px calc(80px + env(safe-area-inset-bottom,0px))}
 /* loader + wave */
 #loader{position:fixed;inset:0;z-index:50;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;color:#fff}
 #loader h1{font-size:clamp(28px,8vw,56px);margin:0;color:var(--yellow);text-shadow:4px 4px 0 var(--pink)}
@@ -39,7 +39,7 @@ button{cursor:pointer}
 #wave{position:fixed;inset:0;width:100%;height:100%;z-index:60;pointer-events:none}
 #fx{position:fixed;inset:0;width:100%;height:100%;z-index:70;pointer-events:none;opacity:0;transition:opacity .45s ease}
 /* header */
-header{text-align:center;margin-bottom:34px}
+header{text-align:center;margin-bottom:34px;padding-top:clamp(28px,6vw,56px)}
 .logo{font-size:clamp(48px,13vw,128px);margin:8px 0 0;display:flex;justify-content:center;gap:4px;flex-wrap:wrap;user-select:none;-webkit-user-select:none}
 .logo span{display:inline-block;cursor:pointer;color:var(--c);
   text-shadow:7px 7px 0 var(--ink),-3px -3px 0 var(--ink),3px -3px 0 var(--ink),-3px 3px 0 var(--ink),0 -3px 0 var(--ink),0 3px 0 var(--ink),-3px 0 0 var(--ink),3px 0 0 var(--ink);
@@ -123,7 +123,6 @@ dialog .row{display:flex;gap:10px;margin-top:18px;justify-content:flex-end}
 dialog .row button{font-size:10px;padding:10px 14px;border:4px solid var(--ink);box-shadow:3px 3px 0 var(--ink);background:#fff;color:#1a1033}
 dialog .row .ok{background:var(--green)}
 #msg{margin-top:10px;font-size:9px;color:var(--pink);min-height:12px}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -229,7 +228,7 @@ const fys=[...Array(10).keys()].sort(()=>Math.random()-.5).map(k=>.03+(k+.2+Math
 for(let i=0;i<10;i++){
   const el=document.createElement("div");el.className="cloud";bg.appendChild(el);
   const sc=[.7,1,1.4,1.9][i%4],dir=i%2?1:-1;
-  clouds.push({el,sc,dir,sp:(12+Math.random()*34)*sc*(reduce?.4:1),x:(i+Math.random()*.6)/10*innerWidth,fy:fys[i],by:fys[i]*innerHeight,oy:0});
+  clouds.push({el,sc,dir,sp:(12+Math.random()*34)*sc*1,x:(i+Math.random()*.6)/10*innerWidth,fy:fys[i],by:fys[i]*innerHeight,oy:0});
 }
 addEventListener("resize",()=>clouds.forEach(c=>c.by=c.fy*innerHeight));
 for(let i=0;i<30;i++){const s=document.createElement("div");s.className="star";s.style.left=Math.random()*100+"%";s.style.top=Math.random()*100+"%";s.style.animationDelay=Math.random()*2.4+"s";bg.appendChild(s)}
@@ -476,7 +475,6 @@ function go(url){
 }
 async function play(g,th){
   if(playing)return;
-  if(reduce){go(g.url);return}
   playing=true;
   try{await document.fonts.load('20px "Press Start 2P"')}catch(e){}
   fx.width=innerWidth;fx.height=innerHeight;fx.style.pointerEvents="auto";fx.style.opacity=1;
