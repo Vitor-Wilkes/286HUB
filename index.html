@@ -180,6 +180,7 @@ const FRASES=[
 /* ===== TEMAS: nome → rótulo (o visual de cada um está no CSS, classes .t-nome; a animação de "jogar" está em E.nome) ===== */
 const TEMAS={arcade:"Arcade",espaco:"Espaço",cobra:"Cobrinha",corrida:"Corrida",fantasma:"Fantasma / Terror",puzzle:"Puzzle",aventura:"Aventura / Plataforma",oceano:"Oceano",esporte:"Esporte",acao:"Ação / Luta",aposta:"Aposta / Cassino",golfe:"Golfe",palavras:"Palavras / Termo"};
 
+console.log("286HUB versão 09/11 - animações ativas");
 const $=s=>document.querySelector(s);
 const COLORS=["#ff5fa2","#ffd23f","#3ddc84","#3a86ff","#ff8c42","#9b5de5"];
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -470,13 +471,14 @@ function title(c,w,h,p,g){
 const fx=$("#fx"),fc=fx.getContext("2d");
 let playing=false;
 function go(url){
-  const w=window.open(url,"_blank","noopener");
-  if(!w)location.href=url; // se o navegador bloquear o pop-up, abre nesta mesma aba
+  const w=window.open(url,"_blank");
+  if(w){try{w.opener=null}catch(e){}}
+  else location.href=url; // se o navegador bloquear o pop-up, abre nesta mesma aba
 }
 async function play(g,th){
   if(playing)return;
   playing=true;
-  try{await document.fonts.load('20px "Press Start 2P"')}catch(e){}
+  try{await Promise.race([document.fonts.load('20px "Press Start 2P"'),new Promise(r=>setTimeout(r,400))])}catch(e){}
   fx.width=innerWidth;fx.height=innerHeight;fx.style.pointerEvents="auto";fx.style.opacity=1;
   const st={},fn=E[th]||E.arcade,t0=performance.now();
   await new Promise(res=>{
