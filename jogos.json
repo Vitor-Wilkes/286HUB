@@ -1,14 +1,5 @@
 [
  {
-  "id": "a2",
-  "name": "Cobrinha Neon",
-  "url": "https://example.com/cobrinha",
-  "desc": "A clássica, só que mais rápida.",
-  "theme": "cobra",
-  "emoji": "🐍",
-  "tag": "HOT"
- },
- {
   "id": "a3",
   "name": "Space Blob",
   "url": "https://example.com/space-blob",
