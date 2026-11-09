@@ -1,19 +1,11 @@
 [
  {
-  "id": "a5",
-  "name": "Caça-Fantasma",
-  "url": "https://example.com/fantasma",
-  "desc": "Ilumine, capture e fuja!",
-  "theme": "fantasma",
-  "emoji": "👻",
-  "tag": "NOVO"
- },
- {
-  "id": "a6",
-  "name": "Torre de Blocos",
-  "url": "https://example.com/torre",
-  "desc": "Empilhe sem deixar cair.",
-  "theme": "puzzle",
-  "emoji": "🧱"
+  "id": "a4",
+  "name": "Corrida Maluca",
+  "url": "https://example.com/corrida",
+  "desc": "Derrube os rivais e cruze a linha.",
+  "theme": "corrida",
+  "emoji": "🏎️",
+  "tag": "HOT"
  }
 ]
