@@ -65,7 +65,8 @@ body.fxing .logo span,body.fxing .emoji,body.fxing .star{animation-play-state:pa
 .game:nth-child(even):hover{transform:translateY(-8px) rotate(1.2deg) scale(1.02)}
 .game.hide{opacity:0;transform:scale(.85);pointer-events:none}
 .cover{aspect-ratio:8/5;border-bottom:4px solid var(--edge,var(--ink));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:var(--cv)}
-.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cover img.pix{image-rendering:pixelated}
 .emoji{font-size:clamp(40px,26cqw,110px);text-shadow:4px 4px 0 rgba(0,0,0,.35);animation:bob 2.4s ease-in-out infinite}
 .game:hover .emoji{animation:wiggle .7s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-10px)}}
@@ -557,7 +558,7 @@ function card(g,i){
   el.style.animationDelay=(i*70)+"ms";
   if(th==="arcade")el.style.setProperty("--cv","linear-gradient(45deg,rgba(255,255,255,.2) 25%,transparent 25% 75%,rgba(255,255,255,.2) 75%) 0 0/32px 32px,"+COLORS[i%6]);
   el.innerHTML=`<a href="${esc(g.url)}" target="_blank" rel="noopener">
-    <div class="cover">${g.tag?`<span class="badge ${g.tag==="HOT"?"hot":""}">${esc(g.tag)}</span>`:""}<span class="emoji">${esc(g.emoji||"🎮")}</span>${g.cover?`<img src="${esc(g.cover)}" alt="Capa de ${esc(g.name)}">`:""}${own.length?`<div class="owners">${own.map(o=>`<span class="own">👤 ${esc(o)}</span>`).join("")}</div>`:""}</div>
+    <div class="cover">${g.tag?`<span class="badge ${g.tag==="HOT"?"hot":""}">${esc(g.tag)}</span>`:""}<span class="emoji">${esc(g.emoji||"🎮")}</span>${g.cover?`<img class="${g.coverPix?"pix":""}" src="${esc(g.cover)}" alt="Capa de ${esc(g.name)}">`:""}${own.length?`<div class="owners">${own.map(o=>`<span class="own">👤 ${esc(o)}</span>`).join("")}</div>`:""}</div>
     <div class="info"><h3>${esc(g.name)}</h3><p>${esc(g.desc)}</p><span class="play">▶ JOGAR</span></div></a>`;
   el.querySelector("a").addEventListener("click",ev=>{
     if(ev.button!==0||ev.ctrlKey||ev.metaKey||ev.shiftKey||ev.altKey)return; // ctrl/cmd+clique abre normal em nova aba
@@ -612,14 +613,19 @@ function openForm(g){
 }
 $("#add").onclick=()=>openForm(null);
 $("#cancel").onclick=()=>$("#dlg").close();
+/* capa em alta qualidade: recorta em 8:5 e guarda até 960x600 (antes era 320x200, borrava em telas grandes/retina).
+   Imagens pequenas (pixel art) não são ampliadas: ficam no tamanho original e o navegador amplia sem borrar. */
 function toCover(file){
   return new Promise((res,rej)=>{
-    const img=new Image();img.onload=()=>{
-      const c=document.createElement("canvas");c.width=320;c.height=200;const x=c.getContext("2d");
-      const r=Math.max(320/img.width,200/img.height),w=img.width*r,h=img.height*r;
-      x.imageSmoothingEnabled=img.width<320;x.drawImage(img,(320-w)/2,(200-h)/2,w,h);
-      res(c.toDataURL("image/webp",.85));
-    };img.onerror=rej;img.src=URL.createObjectURL(file);
+    const img=new Image(),u=URL.createObjectURL(file);
+    img.onload=()=>{
+      const sw=Math.min(img.naturalWidth,img.naturalHeight*1.6),sh=sw/1.6,sx=(img.naturalWidth-sw)/2,sy=(img.naturalHeight-sh)/2;
+      const pix=sw<=480,ow=Math.round(Math.min(960,sw)),oh=Math.round(ow/1.6);
+      const c=document.createElement("canvas");c.width=ow;c.height=oh;const x=c.getContext("2d");
+      x.imageSmoothingEnabled=!pix;x.imageSmoothingQuality="high";
+      x.drawImage(img,sx,sy,sw,sh,0,0,ow,oh);URL.revokeObjectURL(u);
+      res({url:c.toDataURL("image/webp",.92),pix});
+    };img.onerror=()=>rej(new Error("não consegui ler essa imagem"));img.src=u;
   });
 }
 $("#ok").onclick=async()=>{
@@ -628,8 +634,8 @@ $("#ok").onclick=async()=>{
   if(!/^https?:\/\//i.test(url))url="https://"+url;
   try{
     $("#msg").textContent="Salvando...";
-    let cover=editing?.cover;const f=$("#fCover").files[0];if(f)cover=await toCover(f);
-    const g={...(editing||{id:Date.now().toString(36)}),name,url,desc:$("#fDesc").value.trim(),owner:$("#fOwner").value.trim(),theme:$("#fTheme").value,emoji:$("#fEmoji").value.trim(),cover};
+    let cover=editing?.cover,coverPix=editing?.coverPix;const f=$("#fCover").files[0];if(f){const c=await toCover(f);cover=c.url;coverPix=c.pix}
+    const g={...(editing||{id:Date.now().toString(36)}),name,url,desc:$("#fDesc").value.trim(),owner:$("#fOwner").value.trim(),theme:$("#fTheme").value,emoji:$("#fEmoji").value.trim(),cover,coverPix};
     await save(editing?games.map(x=>x.id===g.id?g:x):[g,...games]);
     $("#dlg").close();
   }catch(e){$("#msg").textContent="Não foi possível salvar: "+(e&&e.message||e)}
@@ -689,7 +695,13 @@ async function save(list){
 }
 async function enterAdmin(){
   const rm=await remoteFile();               // lê a versão mais nova direto do GitHub
-  if(rm){try{const l=JSON.parse(fromU8(rm.content));if(Array.isArray(l))games=l}catch(e){}}
+  if(rm){
+    try{
+      // arquivo com mais de 1 MB (muitas capas): o GitHub não manda o conteúdo junto, então busca o arquivo inteiro
+      const l=rm.content?JSON.parse(fromU8(rm.content)):await gh("/contents/"+FILE,{headers:{Accept:"application/vnd.github.raw+json"}});
+      if(Array.isArray(l))games=l;
+    }catch(e){}
+  }
   admin=true;$("#add").style.display="block";$("#out").style.display="block";render();
 }
 let pendingTk=null,fails=0;
