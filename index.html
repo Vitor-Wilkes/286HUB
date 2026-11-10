@@ -41,12 +41,12 @@ button{cursor:pointer}
 /* header */
 header{text-align:center;margin-bottom:34px;padding-top:clamp(28px,6vw,56px)}
 .logo{font-size:clamp(48px,13vw,128px);margin:8px 0 0;display:flex;justify-content:center;gap:4px;flex-wrap:wrap;user-select:none;-webkit-user-select:none}
-.logo span{display:inline-block;cursor:pointer;color:var(--c);
+.logo span{position:relative;isolation:isolate;display:inline-block;cursor:pointer;color:var(--c);
   text-shadow:7px 7px 0 var(--ink),-3px -3px 0 var(--ink),3px -3px 0 var(--ink),-3px 3px 0 var(--ink),0 -3px 0 var(--ink),0 3px 0 var(--ink),-3px 0 0 var(--ink),3px 0 0 var(--ink);
-  scale:var(--s,1);rotate:var(--r,0deg);filter:drop-shadow(0 0 12px var(--c));
-  transition:scale .18s cubic-bezier(.34,1.56,.64,1),rotate .18s ease,filter .18s ease;
-  will-change:transform}
-.logo span.near{filter:drop-shadow(0 0 28px var(--c)) drop-shadow(0 0 6px #fff)}
+  scale:var(--s,1);rotate:var(--r,0deg);transition:scale .14s ease-out,rotate .14s ease-out;will-change:transform}
+.logo span::after{content:attr(data-l);position:absolute;left:0;top:0;z-index:-1;color:var(--c);
+  text-shadow:0 0 18px var(--c),0 0 40px var(--c),0 0 6px #fff;opacity:.35;transition:opacity .18s ease-out;pointer-events:none}
+.logo span.near::after{opacity:1}
 .logo span.pop{animation:pop .7s cubic-bezier(.3,1.4,.5,1)}
 @keyframes pop{0%{transform:translateY(0) rotate(0)}35%{transform:translateY(-46px) rotate(200deg) scale(1.3)}100%{transform:translateY(0) rotate(360deg)}}
 body.fxing .logo span,body.fxing .emoji,body.fxing .star{animation-play-state:paused}
@@ -109,6 +109,20 @@ footer{text-align:center;font-size:9px;margin-top:48px;line-height:2}
 .t-palavras{--card:#1f1f2b;--tx:#fff;--edge:#b59f3b;--cv:linear-gradient(90deg,transparent calc(100% - 5px),#1f1f2b 0) 0 0/46px 46px,linear-gradient(transparent calc(100% - 5px),#1f1f2b 0) 0 0/46px 46px,repeating-conic-gradient(#538d4e 0 25%,#b59f3b 0 50%,#3a3a3c 0 75%,#538d4e 0 100%) 0 0/92px 92px}
 .t-palavras .emoji{animation:flip 2.4s ease-in-out infinite}
 @keyframes flip{0%,100%{transform:rotateX(0)}50%{transform:rotateX(180deg)}}
+/* senha */
+#pw{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(10,5,30,.65);padding:16px}
+#pw[hidden]{display:none}
+.pwbox{width:min(340px,100%);background:var(--card);color:var(--text);border:4px solid var(--ink);box-shadow:8px 8px 0 var(--ink);padding:18px;display:flex;flex-direction:column;gap:12px;font-size:10px}
+.pwbox.shake{animation:shake .35s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.pwt{font-size:12px}
+.pwbox input{width:100%;font-size:11px;padding:12px;border:3px solid var(--ink);background:#fff;color:#1a1033}
+.pwbox input[hidden]{display:none}
+#pwmsg{min-height:12px;font-size:9px;line-height:1.7;color:var(--pink)}
+.pwrow{display:flex;gap:10px;justify-content:flex-end}
+.pwrow button{font-size:10px;padding:10px 12px;border:4px solid var(--ink);box-shadow:3px 3px 0 var(--ink);background:#fff;color:#1a1033}
+.pwrow #pwok{background:var(--green)}
+.pwrow button:disabled{opacity:.6;cursor:wait}
 /* admin */
 #out{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:12px;z-index:10;font-size:10px;padding:12px;border:4px solid var(--ink);background:var(--pink);color:#fff;box-shadow:4px 4px 0 var(--ink);display:none}
 #add{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:10;font-size:10px;padding:12px;border:4px solid var(--ink);background:var(--green);color:#1a1033;box-shadow:4px 4px 0 var(--ink);display:none}
@@ -139,6 +153,16 @@ dialog .row .ok{background:var(--green)}
   <main class="grid" id="grid"></main>
   <div class="empty panel" id="empty">NENHUM JOGO COM ESSE NOME :(</div>
   <footer>© <span id="sec">286HUB</span> · FEITO COM ♥ E MUITOS PIXELS</footer>
+</div>
+
+<div id="pw" hidden>
+  <form class="pwbox" id="pwform" autocomplete="off">
+    <div class="pwt">🔒 ÁREA DO DONO</div>
+    <input id="pwin" type="password" placeholder="SENHA" autocomplete="off" spellcheck="false" aria-label="Senha">
+    <input id="pwrepo" placeholder="usuario/repositorio" autocomplete="off" spellcheck="false" hidden aria-label="Repositório">
+    <div id="pwmsg" role="alert"></div>
+    <div class="pwrow"><button type="button" id="pwx">CANCELAR</button><button type="submit" id="pwok">ENTRAR</button></div>
+  </form>
 </div>
 
 <dialog id="dlg">
@@ -178,7 +202,7 @@ const FRASES=[
 /* ===== TEMAS: nome → rótulo (o visual de cada um está no CSS, classes .t-nome; a animação de "jogar" está em E.nome) ===== */
 const TEMAS={arcade:"Arcade",espaco:"Espaço",cobra:"Cobrinha",corrida:"Corrida",fantasma:"Fantasma / Terror",puzzle:"Puzzle",aventura:"Aventura / Plataforma",oceano:"Oceano",esporte:"Esporte",acao:"Ação / Luta",aposta:"Aposta / Cassino",golfe:"Golfe",palavras:"Palavras / Termo"};
 
-console.log("286HUB versão 09/11 - animações ativas");
+console.log("286HUB versão 10/11 - login por senha");
 const $=s=>document.querySelector(s);
 const COLORS=["#ff5fa2","#ffd23f","#3ddc84","#3a86ff","#ff8c42","#9b5de5"];
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -194,7 +218,7 @@ let playing=false;
 $("#tag").textContent=FRASES[Math.random()*FRASES.length|0];
 
 /* ===== logo interativo: letras crescem/brilham perto do mouse, clique = pulo + confete ===== */
-$("#logo").innerHTML="286HUB".split("").map((c,i)=>`<span style="--c:${COLORS[i]};--i:${i}">${c}</span>`).join("");
+$("#logo").innerHTML="286HUB".split("").map((c,i)=>`<span data-l="${c}" style="--c:${COLORS[i]};--i:${i}">${c}</span>`).join("");
 const letters=[...$("#logo").children];
 function burst(x,y,color,n=16){
   for(let i=0;i<n;i++){
@@ -224,16 +248,35 @@ addEventListener("resize",()=>clouds.forEach(c=>c.by=c.fy*innerHeight));
 for(let i=0;i<30;i++){const s=document.createElement("div");s.className="star";s.style.left=Math.random()*100+"%";s.style.top=Math.random()*100+"%";s.style.animationDelay=Math.random()*2.4+"s";bg.appendChild(s)}
 let mx=-999,my=-999,pdirty=false,ptouch=false;
 addEventListener("pointermove",e=>{mx=e.clientX;my=e.clientY;ptouch=e.pointerType==="touch";pdirty=true},{passive:true});
-const wrapEl=document.querySelector(".wrap"),near=letters.map(()=>false);
+/* centros das letras guardados em coordenadas da página: nada de medir o layout a cada movimento */
+const wrapEl=document.querySelector(".wrap"),near=letters.map(()=>false),lastS=letters.map(()=>"1.0"),lastR=letters.map(()=>0);
+let lcx=[],lcy=[],lTop=0,lBot=0;
+function measureLogo(){
+  const L=wrapEl.getBoundingClientRect(),ox=L.left+scrollX,oy=L.top+scrollY;
+  lcx=letters.map(s=>ox+s.offsetLeft+s.offsetWidth/2);
+  lcy=letters.map(s=>oy+s.offsetTop+s.offsetHeight/2);
+  lTop=Math.min(...lcy)-260;lBot=Math.max(...lcy)+260;
+}
+measureLogo();addEventListener("resize",measureLogo);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(measureLogo);
+setTimeout(measureLogo,1500);
+let logoWasActive=false;
 function updateLogo(){
-  const L=wrapEl.getBoundingClientRect();
-  letters.forEach((s,i)=>{
-    const dx=mx-(L.left+s.offsetLeft+s.offsetWidth/2),dy=my-(L.top+s.offsetTop+s.offsetHeight/2);
-    const k=ptouch?0:Math.round(Math.max(0,1-Math.hypot(dx,dy)/170)*10)/10;
-    s.style.setProperty("--s",(1+k*.85).toFixed(2));
-    s.style.setProperty("--r",Math.round(k*-dx/170*14)+"deg");
+  const py=my+scrollY,active=!ptouch&&py>lTop&&py<lBot;
+  if(!active&&!logoWasActive)return;      // mouse longe do letreiro: não faz nada
+  logoWasActive=active;
+  const px=mx+scrollX;let any=false;
+  for(let i=0;i<letters.length;i++){
+    const dx=px-lcx[i],dy=py-lcy[i];
+    const k=active?Math.round(Math.max(0,1-Math.hypot(dx,dy)/170)*10)/10:0;
+    if(k>0)any=true;
+    const sv=(1+k*.85).toFixed(2),rv=Math.round(k*-dx/170*14/3)*3;
+    const s=letters[i];
+    if(sv!==lastS[i]){lastS[i]=sv;s.style.setProperty("--s",sv)}
+    if(rv!==lastR[i]){lastR[i]=rv;s.style.setProperty("--r",rv+"deg")}
     const nr=k>=.3;if(nr!==near[i]){near[i]=nr;s.classList.toggle("near",nr)}
-  });
+  }
+  if(!any)logoWasActive=false;
 }
 let lastT=performance.now();
 (function loop(now){
@@ -595,6 +638,26 @@ $("#ok").onclick=async()=>{
    Quem manda é o próprio GitHub: só um token com permissão de escrita no seu repositório consegue gravar.
    O token NÃO fica no código; fica só no navegador de quem digitou (localStorage). */
 const FILE="jogos.json";
+/* token do GitHub guardado CRIPTOGRAFADO (AES-256-GCM, chave derivada da senha com PBKDF2). Sem a senha certa ele não abre. */
+const VAULT="9iXiBIJNEpl4gx4SgC8pU06MhV5+xWP39SciL16A56CgXpA8I6csxr9D1PWK0D+mYKwOUvu/7wMG/DCwiw+LbV2drYAAth0sZc3XSN6iepGRk1KOZwmgz067c0xuHkjKYn0EhS+sO1CXp6djvNekCJzPZ2sQYPtPZdO5We1aU0BTgofpa3LkQj4=";
+const b64=b=>Uint8Array.from(atob(b),c=>c.charCodeAt(0));
+async function openVault(pass){
+  const d=b64(VAULT),km=await crypto.subtle.importKey("raw",new TextEncoder().encode(pass),"PBKDF2",false,["deriveKey"]);
+  const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:d.slice(0,16),iterations:600000,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["decrypt"]);
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:d.slice(16,28)},key,d.slice(28)); // erro = senha errada
+  return new TextDecoder().decode(pt);
+}
+/* descobre sozinho em qual repositório o token pode escrever (o que tem o jogos.json tem prioridade) */
+async function findRepo(tk){
+  const H={Accept:"application/vnd.github+json",Authorization:"Bearer "+tk};
+  const res=await fetch("https://api.github.com/user/repos?per_page=100&sort=pushed",{headers:H});
+  if(!res.ok)return null;
+  const list=(await res.json()).filter(r=>r.permissions&&r.permissions.push);
+  for(const r of list.slice(0,12)){
+    try{const x=await fetch(`https://api.github.com/repos/${r.full_name}/contents/${FILE}`,{headers:H});if(x.ok)return{owner:r.owner.login,repo:r.name,branch:""}}catch(e){}
+  }
+  return list.length===1?{owner:list[0].owner.login,repo:list[0].name,branch:""}:null;
+}
 function repoInfo(){
   let r=null;try{r=JSON.parse(localStorage.getItem("hub_repo"))}catch(e){}
   if(r&&r.owner&&r.repo)return r;
@@ -615,7 +678,7 @@ async function remoteFile(){
   try{return await gh("/contents/"+FILE)}catch(e){if(String(e.message).includes(" 404"))return null;throw e}
 }
 async function save(list){
-  if(!admin)throw new Error("faça login como dono (Shift+Alt+V)");
+  if(!admin)throw new Error("entre como dono (Shift+Alt+V)");
   const cur=await remoteFile();
   const body={message:"286HUB: atualiza jogos",content:u8(JSON.stringify(list,null,1))};
   if(cur)body.sha=cur.sha;
@@ -629,27 +692,54 @@ async function enterAdmin(){
   if(rm){try{const l=JSON.parse(fromU8(rm.content));if(Array.isArray(l))games=l}catch(e){}}
   admin=true;$("#add").style.display="block";$("#out").style.display="block";render();
 }
+let pendingTk=null,fails=0;
+function openPw(){
+  pendingTk=null;$("#pwin").value="";$("#pwrepo").hidden=true;$("#pwin").hidden=false;$("#pwmsg").textContent="";
+  $("#pw").hidden=false;setTimeout(()=>$("#pwin").focus(),30);
+}
+function closePw(){$("#pw").hidden=true;pendingTk=null}
+function pwErr(m){
+  $("#pwmsg").textContent=m;const b=$("#pwform");b.classList.remove("shake");void b.offsetWidth;b.classList.add("shake");
+}
 async function login(){
-  let r=repoInfo();
-  if(!r.owner||!r.repo){
-    const t=prompt("Repositório (usuario/repo):");if(!t||!t.includes("/"))return;
-    const [o,n]=t.trim().split("/");r={owner:o,repo:n,branch:""};
-  }
-  const tk=prompt("Cole seu token do GitHub (permissão Contents: Read and write neste repositório):");
-  if(!tk)return;
-  localStorage.setItem("hub_token",tk.trim());localStorage.setItem("hub_repo",JSON.stringify(r));
+  const ok=$("#pwok");ok.disabled=true;$("#pwmsg").textContent="VERIFICANDO...";
   try{
+    let tk=pendingTk,r=null;
+    if(!tk){
+      try{tk=await openVault($("#pwin").value)}
+      catch(e){
+        fails++;await new Promise(x=>setTimeout(x,Math.min(fails,5)*600));
+        pwErr("SENHA INCORRETA");$("#pwin").select();return;
+      }
+      fails=0;
+    }
+    if(pendingTk){
+      const t=$("#pwrepo").value.trim().split("/");
+      if(t.length!==2||!t[0]||!t[1]){pwErr("USE O FORMATO usuario/repositorio");return}
+      r={owner:t[0],repo:t[1],branch:""};
+    }else{
+      r=repoInfo();if(!r.owner||!r.repo||!localStorage.getItem("hub_repo"))r=await findRepo(tk);
+    }
+    if(!r){
+      pendingTk=tk;$("#pwin").hidden=true;$("#pwrepo").hidden=false;$("#pwrepo").focus();
+      pwErr("SENHA OK! NÃO ACHEI O REPOSITÓRIO SOZINHO: INFORME ABAIXO");return;
+    }
+    localStorage.setItem("hub_token",tk);localStorage.setItem("hub_repo",JSON.stringify(r));
     const info=await gh("");
-    if(!info.permissions||!info.permissions.push)throw new Error("esse token não tem permissão de escrita");
-    await enterAdmin();
+    if(!info.permissions||!info.permissions.push)throw new Error("o token não tem permissão de escrita nesse repositório");
+    closePw();await enterAdmin();
   }catch(e){
     localStorage.removeItem("hub_token");
-    alert("Não foi possível entrar: "+(e.message||e));
-  }
+    if(pendingTk)pwErr("ERRO: "+(e.message||e));else{pendingTk=null;pwErr("ERRO: "+(e.message||e))}
+  }finally{ok.disabled=false}
 }
 function logout(){localStorage.removeItem("hub_token");admin=false;location.reload()}
-const toggleAdmin=()=>admin?logout():login();
+const toggleAdmin=()=>admin?logout():($("#pw").hidden?openPw():closePw());
 $("#out").onclick=logout;
+$("#pwform").addEventListener("submit",e=>{e.preventDefault();login()});
+$("#pwx").onclick=closePw;
+$("#pw").addEventListener("pointerdown",e=>{if(e.target.id==="pw")closePw()});
+addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#pw").hidden)closePw()});
 /* atalho secreto: Shift + Alt + V (usa a tecla física V, então funciona em qualquer layout/Mac) */
 addEventListener("keydown",e=>{
   if(e.shiftKey&&e.altKey&&!e.ctrlKey&&!e.metaKey&&e.code==="KeyV"){e.preventDefault();toggleAdmin()}
